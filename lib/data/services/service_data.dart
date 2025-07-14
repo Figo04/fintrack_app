@@ -119,6 +119,73 @@ class FinancialService {
     }
   }
 
+  // ✅ Delete transaction and revert balance
+  Future<Map<String, dynamic>> deleteTransaction({
+    required int transactionId,
+    required int userId,
+  }) async {
+    try {
+      // Get transaction details
+      final transaction = await _repository.getTransactionById(transactionId);
+      if (transaction == null) {
+        throw Exception('Transaksi tidak ditemukan');
+      }
+
+      // Verify transaction belongs to user
+      if (transaction.userId != userId) {
+        throw Exception(
+            'Anda tidak memiliki akses untuk menghapus transaksi ini');
+      }
+
+      // Get account
+      final account =
+          await _repository.getUserAccount(userId, transaction.accountId);
+      if (account == null) {
+        throw Exception('Akun tidak ditemukan');
+      }
+
+      // Calculate new balance (revert the transaction)
+      double newBalance;
+      if (transaction.type == TransactionType.income) {
+        // If it was income, subtract the amount to revert
+        newBalance = account.balance - transaction.amount;
+      } else {
+        // If it was expense, add the amount back to revert
+        newBalance = account.balance + transaction.amount;
+      }
+
+      // Check if reverting expense won't cause negative balance issues
+      // (This shouldn't happen in normal cases, but good to check)
+      if (newBalance < 0 && transaction.type == TransactionType.income) {
+        throw Exception(
+            'Tidak dapat menghapus transaksi: akan menyebabkan saldo negatif');
+      }
+
+      // Delete transaction first
+      await _repository.deleteTransaction(transactionId);
+
+      // Update account balance
+      final updatedAccount = account.copyWith(
+        balance: newBalance,
+        updatedAt: DateTime.now(),
+      );
+      await _repository.updateUserAccount(updatedAccount);
+
+      return {
+        'success': true,
+        'newBalance': newBalance,
+        'totalBalance': await getTotalBalance(userId),
+        'message': 'Transaksi berhasil dihapus dan saldo telah dikembalikan',
+      };
+    } catch (e) {
+      print('Error in deleteTransaction: $e');
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
   // Get user accounts with details
   Future<List<Map<String, dynamic>>> getUserAccountsWithDetails(
       int userId) async {

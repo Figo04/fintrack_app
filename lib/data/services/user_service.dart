@@ -109,6 +109,56 @@ class UserService {
     }
   }
 
+  // ✅ Method untuk verifikasi kepemilikan transaksi
+  Future<bool> verifyTransactionOwnership(int transactionId) async {
+    final userId = await getCurrentUserId();
+    if (userId == null) return false;
+
+    return await _dbHelper.verifyTransactionOwnership(transactionId, userId);
+  }
+
+  // ✅ Method untuk mendapatkan statistik transaksi user
+  Future<Map<String, dynamic>> getUserTransactionStats() async {
+    final userId = await getCurrentUserId();
+    if (userId == null) {
+      return {
+        'total_transactions': 0,
+        'total_income': 0.0,
+        'total_expense': 0.0,
+        'net_balance': 0.0,
+      };
+    }
+
+    return await _dbHelper.getTransactionStats(userId);
+  }
+
+  // ✅ Method untuk mendapatkan detail transaksi dengan verifikasi
+  Future<Map<String, dynamic>?> getTransactionDetails(int transactionId) async {
+    final userId = await getCurrentUserId();
+    if (userId == null) return null;
+
+    // Verifikasi kepemilikan
+    final isOwner = await verifyTransactionOwnership(transactionId);
+    if (!isOwner) return null;
+
+    return await _dbHelper.getTransactionWithAccountDetails(transactionId);
+  }
+
+  // ✅ Method untuk validasi user session
+  Future<bool> validateUserSession() async {
+    try {
+      final firebaseUser = currentUser;
+      if (firebaseUser == null) return false;
+
+      // Cek apakah user masih valid di database lokal
+      final localUser = await _dbHelper.getUserByFirebaseUid(firebaseUser.uid);
+      return localUser != null;
+    } catch (e) {
+      print('Error validating user session: $e');
+      return false;
+    }
+  }
+
   // ✅ Method untuk debug - cek akun user
   Future<void> debugUserAccounts() async {
     final userId = await getCurrentUserId();
@@ -125,6 +175,58 @@ class UserService {
         print(
             'Account $i: ${accountType.name} (ID: ${account.id}, Balance: ${account.balance})');
       }
+    }
+  }
+
+  // ✅ Method untuk debug - cek transaksi user
+  Future<void> debugUserTransactions() async {
+    final userId = await getCurrentUserId();
+    if (userId != null) {
+      final transactions =
+          await _financialService.getTransactionHistory(userId);
+      print('=== DEBUG USER TRANSACTIONS ===');
+      print('User ID: $userId');
+      print('Total transactions: ${transactions.length}');
+
+      for (int i = 0; i < transactions.length && i < 5; i++) {
+        final transaction = transactions[i];
+        print(
+            'Transaction $i: ${transaction.description} - ${transaction.type} - ${transaction.amount}');
+      }
+    }
+  }
+
+  // ✅ Method untuk mendapatkan ringkasan akun user
+  Future<Map<String, dynamic>> getUserAccountSummary() async {
+    final userId = await getCurrentUserId();
+    if (userId == null) {
+      return {
+        'total_balance': 0.0,
+        'total_accounts': 0,
+        'accounts': [],
+      };
+    }
+
+    final accounts = await _financialService.getUserAccountsWithDetails(userId);
+    final totalBalance = await _financialService.getTotalBalance(userId);
+
+    return {
+      'total_balance': totalBalance,
+      'total_accounts': accounts.length,
+      'accounts': accounts,
+    };
+  }
+
+  // ✅ Method untuk logout dengan cleanup
+  Future<void> signOutWithCleanup() async {
+    try {
+      // Lakukan cleanup jika diperlukan
+      await _dbHelper.closeDatabase();
+      await _auth.signOut();
+    } catch (e) {
+      print('Error during sign out: $e');
+      // Tetap coba logout Firebase meskipun ada error
+      await _auth.signOut();
     }
   }
 }
