@@ -295,7 +295,7 @@ class _PengeluaranScreenState extends State<PengeluaranScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Tammabh Pengeluaran',
+          'Tambah Pengeluaran',
           style: TextStyle(
             color: AppColors.white,
             fontWeight: FontWeight.bold,

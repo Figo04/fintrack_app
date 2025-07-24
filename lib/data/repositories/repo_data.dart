@@ -201,9 +201,9 @@ class FinancialRepository {
       final db = await _dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.rawQuery('''
         SELECT t.*, 
-               ua.balance as account_balance, 
-               at.name as account_name, 
-               at.icon as account_icon
+              ua.balance as account_balance, 
+              at.name as account_name, 
+              at.icon as account_icon
         FROM transactions t
         INNER JOIN user_accounts ua ON t.account_id = ua.id
         INNER JOIN account_types at ON ua.account_type_id = at.id
