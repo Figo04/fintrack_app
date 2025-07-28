@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
   /// Variabel untuk menyimpan input password dari form
   var _enteredPassword = '';
 
-  /// Variabel untuk menyimpan input username dari form (hanya untuk signup)
+  // Username yang diinput user saat signup (harus var karena diupdate di onSaved)
   var _enteredUsername = '';
 
   /// Flag untuk menunjukkan status loading
@@ -291,6 +291,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     style: TextStyle(color: Colors.white),
                                   ),
                           ),
+
+
 
                           // === TOGGLE BUTTON LOGIN/SIGNUP ===
                           // Button untuk beralih antara mode login dan signup

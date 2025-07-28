@@ -1,5 +1,4 @@
 import 'package:fintrack_apps/core/themes/color.dart';
-import 'package:fintrack_apps/features/auth/screen/login.dart';
 import 'package:fintrack_apps/home/screen/tabs.dart';
 import 'package:flutter/material.dart';
 

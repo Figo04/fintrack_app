@@ -11,7 +11,7 @@ class DatabaseHelper {
 
   // Factory constructor untuk mengembalikan instance yang sama
   factory DatabaseHelper() => _instance;
-  
+
   // Private constructor untuk mencegah instantiation langsung
   DatabaseHelper._internal();
 
@@ -146,7 +146,8 @@ class DatabaseHelper {
 
     // Tambahkan kolom account_name jika belum ada
     try {
-      await db.execute('ALTER TABLE user_accounts ADD COLUMN account_name TEXT');
+      await db
+          .execute('ALTER TABLE user_accounts ADD COLUMN account_name TEXT');
     } catch (e) {
       print('Column account_name might already exist: $e');
     }
@@ -353,4 +354,3 @@ class DatabaseHelper {
     }
   }
 }
-

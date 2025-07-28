@@ -139,6 +139,8 @@ class FinancialRepository {
     }
   }
 
+
+
   /// Mendapatkan daftar transaksi untuk user tertentu
   /// Diurutkan berdasarkan tanggal terbaru
   Future<List<Transaction>> getTransactions(int userId, {int limit = 50}) async {
@@ -429,3 +431,4 @@ class FinancialRepository {
     }
   }
 }
+
