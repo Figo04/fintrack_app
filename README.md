@@ -217,7 +217,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 💬 Support
 
-- 📧 **Email**: support@example.com
+- 📧 **Email**: fiigoo0404@gmail.com
 - 🐛 **Issues**: [GitHub Issues](https://github.com/Figo04/fintrack_app/issues)
 - 📖 **Documentation**: [Full Documentation](https://example.com/fintrack_app/docs)
 
